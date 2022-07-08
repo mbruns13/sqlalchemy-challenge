@@ -128,22 +128,27 @@ def temperature():
 #   Return a JSON list of temperature observations (TOBS) for the previous year.
     return jsonify(temp_list)
 
-# @app.route("/api/v1.0/<start>")
-# def ():
-# #   Return a JSON list of the minimum temperature, the average temperature, and the maximum temperature for a given start or start-end range.
-# #   When given the start only, calculate TMIN, TAVG, and TMAX for all dates greater than or equal to the start date.
-# #   When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates from the start date through the end date (inclusive).
+@app.route("/api/v1.0/<start>")
+def start_date(start):
+#   Return a JSON list of the minimum temperature, the average temperature, and the maximum temperature for a given start or start-end range.
+#   When given the start only, calculate TMIN, TAVG, and TMAX for all dates greater than or equal to the start date.
     
-#     session = Session(engine)
-#     results = session.query().all()
-#     session.close()
+    session = Session(engine)
+    query_start_date = datetime.strptime("start", "%Y-%m-%d")
 
-#     return(
+    results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= query_start_date).first()
+    #TMAX = session.query(func.max(Measurement.tobs)).filter(Measurement.date >= query_start_date).scalar()
+    #TAVG = session.query(func.avg(Measurement.tobs)).filter(Measurement.date >= query_start_date).scalar()
 
-#     )
+    session.close()
+    
+    date_query_results = list(np.ravel(results))
+
+    return(date_query_results)
 
 # @app.route("/api/v1.0/<start>/<end>")
-# def ():
+# def start_end(start, end):
+#   When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates from the start date through the end date (inclusive).
     
 #     session = Session(engine)
 #     results = session.query().all()

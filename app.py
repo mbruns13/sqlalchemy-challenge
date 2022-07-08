@@ -63,7 +63,6 @@ def homepage():
 @app.route("/api/v1.0/precipitation")
 def precipitation():
 #   Convert the query results to a dictionary using date as the key and prcp as the value.
-#   Return the JSON representation of your dictionary.   
     
     # Create our session (link) from Python to the DB
     session = Session(engine)
@@ -77,7 +76,8 @@ def precipitation():
         precip_dict["date"] = date
         precip_dict["prcp"] = prcp
         precip_data.append(precip_dict)
-    
+
+#   Return the JSON representation of your dictionary.       
     return jsonify(precip_data)
 
 @app.route("/api/v1.0/stations")
@@ -97,23 +97,36 @@ def stations():
     
     station_list = list(np.ravel(results))
 
+#   Return JSON list of stations
     return jsonify(station_list)
 
 @app.route("/api/v1.0/tobs")
 def temperature():
 #   Query the dates and temperature observations of the most active station for the previous year of data.
-#   Return a JSON list of temperature observations (TOBS) for the previous year.
-    
+## -- IS IT MOST ACTIVE IN THE PAST YEAR? OR OK AS IS (MOST ACTIVE OVERALL, THEN DATA FROM PAST YEAR)    
+
     session = Session(engine)
     
-    most_active_station = session.query(Station.station).filter(Station.station == Measurement.station).group_by(Station.station).order_by(func.count(Measurement.station).desc()).first()
+    #find station with highest count of measurements 
+    most_active_station_row = session.query(Station.station).filter(Station.station == Measurement.station).group_by(Station.station).order_by(func.count(Measurement.station).desc()).first()
+    most_active_station = most_active_station_row[0]
+    #find most recent date in measurement table
     recent_date_string = session.query(Measurement.date).order_by(Measurement.date.desc()).first().date
+    #convert date string to datetime object
     recent_date = datetime.strptime(recent_date_string, "%Y-%m-%d")
+    #calculate date to use in query for past year
     query_date =  recent_date - dt.timedelta(days=365)
-    results = session.query(Measurement.date, Measurement.tobs).filter(Station.station == Measurement.station).filter(Measurement.Station == most_active_station).filter(Measurement.date >= query_date).order_by(Measurement.date).all()
+    #query for dates and temperatures, using filter for: most active station, date of measurement being >= query_date -- order results by date in ascending order
+    results = session.query(Measurement.date, Measurement.tobs).filter(Measurement.date >= query_date).filter(Measurement.station == most_active_station).order_by(Measurement.date).all()
+    #close session
     session.close()
 
-    return(results)
+    #create list of temperatures
+    temp_results = [result.tobs for result in results]
+    temp_list = list(np.ravel(temp_results))
+
+#   Return a JSON list of temperature observations (TOBS) for the previous year.
+    return jsonify(temp_list)
 
 # @app.route("/api/v1.0/<start>")
 # def ():

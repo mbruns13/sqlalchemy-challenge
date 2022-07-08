@@ -132,7 +132,9 @@ def temperature():
 def start_date(start):
 #   Return a JSON list of the minimum temperature, the average temperature, and the maximum temperature for a given start or start-end range.
 #   When given the start only, calculate TMIN, TAVG, and TMAX for all dates greater than or equal to the start date.
-    
+
+#RECEIVING ERROR: ValueError: time data 'start' does not match format '%Y-%m-%d'
+
     session = Session(engine)
     query_start_date = datetime.strptime("start", "%Y-%m-%d")
 
@@ -155,8 +157,6 @@ def start_date(start):
 #     session.close()
 
 #     return()
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -73,6 +73,7 @@ def precipitation():
     precip_data = []
     for date, prcp in results: 
         precip_dict = {}
+        #trying to see if I can return date as a dt object rather than a string? date_dt_object =  dt.datetime.strptime(date, "%Y-%m-%d")
         precip_dict["date"] = date
         precip_dict["prcp"] = prcp
         precip_data.append(precip_dict)
@@ -103,7 +104,7 @@ def stations():
 @app.route("/api/v1.0/tobs")
 def temperature():
 #   Query the dates and temperature observations of the most active station for the previous year of data.
-## -- IS IT MOST ACTIVE IN THE PAST YEAR? OR OK AS IS (MOST ACTIVE OVERALL, THEN DATA FROM PAST YEAR)    
+## Learning Assistant said to first find most active station in the entire data set, then find corresponding data   
 
     session = Session(engine)
     
@@ -136,7 +137,7 @@ def start_date(start):
 #RECEIVING ERROR: ValueError: time data 'start' does not match format '%Y-%m-%d'
 
     session = Session(engine)
-    query_start_date = datetime.strptime("start", "%Y-%m-%d")
+    query_start_date = dt.datetime.strptime("start", "%Y-%m-%d").date()
 
     results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= query_start_date).first()
     #TMAX = session.query(func.max(Measurement.tobs)).filter(Measurement.date >= query_start_date).scalar()

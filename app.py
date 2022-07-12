@@ -138,16 +138,20 @@ def start_date(start=None):
 
     session = Session(engine)
     
+#   saving input as date to be used for filter in query
     query_start_date = dt.datetime.strptime(start, "%m-%d-%Y")
     
+#   querying for (in order) min, avg, and max temperature for all dates greater than or equal to the start date provided by the user
     results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= query_start_date).all()
     #TMAX = session.query(func.max(Measurement.tobs)).filter(Measurement.date >= query_start_date).scalar()
     #TAVG = session.query(func.avg(Measurement.tobs)).filter(Measurement.date >= query_start_date).scalar()
 
     session.close()
     
+#   converting results to list
     date_query_results = list(np.ravel(results))
 
+#   returning JSON list of min, avg, max temp
     return jsonify(date_query_results)
 
 @app.route("/api/v1.0/<start>/<end>")
@@ -155,15 +159,20 @@ def start_end(start=None, end=None):
 #  When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates from the start date through the end date (inclusive).
     
     session = Session(engine)
+    
+#   saving inputs as start and end dates to be used for filtering query    
     query_start_date = dt.datetime.strptime(start, "%m-%d-%Y")
     query_end_date = dt.datetime.strptime(end, "%m-%d-%Y")
 
+#   querying for (in order) min, avg, and max temperature for all dates within the date range provided by the user (inclusive)
     results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= query_start_date).filter(Measurement.date <= query_end_date).all()
 
     session.close()
 
+#   converting results to list
     date_query_results = list(np.ravel(results))
 
+#   returning JSON list of min, avg, max temp
     return jsonify(date_query_results)
 
 if __name__ == '__main__':

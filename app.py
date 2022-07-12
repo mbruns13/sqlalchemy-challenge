@@ -117,6 +117,7 @@ def temperature():
     recent_date = datetime.strptime(recent_date_string, "%Y-%m-%d")
     #calculate date to use in query for past year
     query_date =  recent_date - dt.timedelta(days=365)
+    
     #query for dates and temperatures, using filter for: most active station, date of measurement being >= query_date -- order results by date in ascending order
     results = session.query(Measurement.date, Measurement.tobs).filter(Measurement.date >= query_date).filter(Measurement.station == most_active_station).order_by(Measurement.date).all()
     #close session
@@ -135,11 +136,10 @@ def start_date(start):
 #   When given the start only, calculate TMIN, TAVG, and TMAX for all dates greater than or equal to the start date.
 
 #RECEIVING ERROR: ValueError: time data 'start' does not match format '%Y-%m-%d'
-
     session = Session(engine)
     query_start_date = dt.datetime.strptime("start", "%Y-%m-%d").date()
-
-    results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= query_start_date).first()
+    
+    results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= query_start_date).all()
     #TMAX = session.query(func.max(Measurement.tobs)).filter(Measurement.date >= query_start_date).scalar()
     #TAVG = session.query(func.avg(Measurement.tobs)).filter(Measurement.date >= query_start_date).scalar()
 

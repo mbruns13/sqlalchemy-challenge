@@ -131,13 +131,14 @@ def temperature():
     return jsonify(temp_list)
 
 @app.route("/api/v1.0/<start>")
-def start_date(start):
+def start_date(start=None):
 #   Return a JSON list of the minimum temperature, the average temperature, and the maximum temperature for a given start or start-end range.
 #   When given the start only, calculate TMIN, TAVG, and TMAX for all dates greater than or equal to the start date.
+    #print(dt.datetime.strptime(start, "%m-%d-%Y").date())
 
-#RECEIVING ERROR: ValueError: time data 'start' does not match format '%Y-%m-%d'
     session = Session(engine)
-    query_start_date = dt.datetime.strptime("start", "%Y-%m-%d").date()
+    
+    query_start_date = dt.datetime.strptime(start, "%m-%d-%Y")
     
     results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= query_start_date).all()
     #TMAX = session.query(func.max(Measurement.tobs)).filter(Measurement.date >= query_start_date).scalar()
@@ -147,17 +148,23 @@ def start_date(start):
     
     date_query_results = list(np.ravel(results))
 
-    return(date_query_results)
+    return jsonify(date_query_results)
 
-# @app.route("/api/v1.0/<start>/<end>")
-# def start_end(start, end):
-#   When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates from the start date through the end date (inclusive).
+@app.route("/api/v1.0/<start>/<end>")
+def start_end(start=None, end=None):
+#  When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates from the start date through the end date (inclusive).
     
-#     session = Session(engine)
-#     results = session.query().all()
-#     session.close()
+    session = Session(engine)
+    query_start_date = dt.datetime.strptime(start, "%m-%d-%Y")
+    query_end_date = dt.datetime.strptime(end, "%m-%d-%Y")
 
-#     return()
+    results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= query_start_date).filter(Measurement.date <= query_end_date).all()
+
+    session.close()
+
+    date_query_results = list(np.ravel(results))
+
+    return jsonify(date_query_results)
 
 if __name__ == '__main__':
     app.run(debug=True)
